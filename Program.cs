@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace MyprojecsApp
 {
@@ -8,7 +9,57 @@ namespace MyprojecsApp
         public static List<Clients> ClientsList = new List<Clients>();
         static void Main(string[] args)
         {
-            Console.ReadKey();
+            // Задача 1
+            while (true)
+            {
+                Console.WriteLine("1.Добавить клиент\n2.Обновить или изменить все данние клиента\n3.Обновить или изменить данние клиента по ID\n4.Удалить данние клиента по ID\n5.Посмотреть список клиент\n6.Посмотреть данние клиента по ID");
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        {
+                            Thread InsertThread = new Thread(new ThreadStart(Insert));
+                            InsertThread.Start();
+                            InsertThread.Join();
+                        }
+                        break;
+                    case "2":
+                        {
+                            Thread UpdateThread = new Thread(new ThreadStart(Update));
+                            UpdateThread.Start();
+                            UpdateThread.Join();
+                        }
+                        break;
+                    case "3":
+                        {
+                            Thread SelectByIdThread = new Thread(new ThreadStart(SelectById));
+                            SelectByIdThread.Start();
+                            SelectByIdThread.Join();
+                        }
+                        break;
+                    case "4":
+                        {
+                            Thread DeleteByIdThread = new Thread(new ThreadStart(DeleteById));
+                            DeleteByIdThread.Start();
+                            DeleteByIdThread.Join();
+                        }
+                        break;
+                    case "5":
+                        {
+                            Thread SelectThread = new Thread(new ThreadStart(Select));
+                            SelectThread.Start();
+                            SelectThread.Join();
+                        }
+                        break;
+                    case "6":
+                        {
+                            Thread SelectByIdThread = new Thread(new ThreadStart(SelectById));
+                            SelectByIdThread.Start();
+                            SelectByIdThread.Join();
+                        }
+                        break;
+
+                }
+            }
         }
 
 
@@ -41,9 +92,10 @@ namespace MyprojecsApp
             }
         }
         //Обновить по Id
-        public static void UpdateById(int SetId)
+        public static void UpdateById()
         {
             Console.Clear();
+            Console.Write("ID: "); int SetId = int.Parse(Console.ReadLine());
             Console.Write("LastName: "); string LastName = Console.ReadLine();
             Console.Write("FirstName: "); string FirstName = Console.ReadLine();
             Console.Write("MiddleName: "); string MiddleName = Console.ReadLine();
@@ -61,9 +113,10 @@ namespace MyprojecsApp
 
         }
         //Удалить по Id
-        public static void DeleteById(int SetId)
+        public static void DeleteById()
         {
             Console.Clear();
+            Console.Write("ID: "); int SetId = int.Parse(Console.ReadLine());
             foreach (var i in ClientsList)
             {
                 if (SetId == i.ID)
@@ -85,9 +138,10 @@ namespace MyprojecsApp
             }
         }
         //Посмотреть по Id
-        public static void SelectById(int SetId)
+        public static void SelectById()
         {
             Console.Clear();
+            Console.Write("ID: "); int SetId = int.Parse(Console.ReadLine());
             foreach (var i in ClientsList)
             {
                 if (SetId == i.ID)
