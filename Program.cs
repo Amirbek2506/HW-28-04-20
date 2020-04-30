@@ -2,17 +2,22 @@
 using System.Collections.Generic;
 using System.Threading;
 
+
 namespace MyprojecsApp
 {
     class Program
     {
+        public static int newID=0;
         public static List<Clients> ClientsList = new List<Clients>();
+        public static List<Clients> CheckClientList = new List<Clients>();
         static void Main(string[] args)
         {
-            // Задача 1
+            TimerCallback TimerCallback = new TimerCallback(FindUpdateBalance);
+            Timer tm = new Timer(TimerCallback, ClientsList, 0, 1000);
+
             while (true)
             {
-                Console.WriteLine("1.Добавить клиент\n2.Обновить или изменить все данние клиента\n3.Обновить или изменить данние клиента по ID\n4.Удалить данние клиента по ID\n5.Посмотреть список клиент\n6.Посмотреть данние клиента по ID");
+                Console.WriteLine("1.Добавить клиент\n2.Обновить или изменить данние клиента по ID\n3.Удалить все\n4.Удалить данние клиента по ID\n5.Посмотреть список клиент\n6.Посмотреть данние клиента по ID");
                 switch (Console.ReadLine())
                 {
                     case "1":
@@ -24,16 +29,16 @@ namespace MyprojecsApp
                         break;
                     case "2":
                         {
-                            Thread UpdateThread = new Thread(new ThreadStart(Update));
-                            UpdateThread.Start();
-                            UpdateThread.Join();
+                            Thread UpdateByIdThread = new Thread(new ThreadStart(UpdateById));
+                            UpdateByIdThread.Start();
+                            UpdateByIdThread.Join();
                         }
                         break;
                     case "3":
                         {
-                            Thread SelectByIdThread = new Thread(new ThreadStart(SelectById));
-                            SelectByIdThread.Start();
-                            SelectByIdThread.Join();
+                            Thread DeleteThread = new Thread(new ThreadStart(Delete));
+                            DeleteThread.Start();
+                            DeleteThread.Join();
                         }
                         break;
                     case "4":
@@ -57,12 +62,31 @@ namespace MyprojecsApp
                             SelectByIdThread.Join();
                         }
                         break;
-
                 }
             }
         }
 
-
+        public static void FindUpdateBalance(object obj)
+        {
+            List<Clients> list = obj as List<Clients>;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Balance > CheckClientList[i].Balance)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"ID:{list[i].ID}\nБаланс до изменения:{CheckClientList[i].Balance}\nБаланс после изменения:{list[i].Balance}\nРазница: +{list[i].Balance - CheckClientList[i].Balance}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    CheckClientList[i].Balance = list[i].Balance;
+                }
+                else if (list[i].Balance < CheckClientList[i].Balance)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"ID:{list[i].ID}\nБаланс до изменения:{CheckClientList[i].Balance}\nБаланс после изменения:{list[i].Balance}\nРазница: {list[i].Balance - CheckClientList[i].Balance}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    CheckClientList[i].Balance = list[i].Balance;
+                }
+            }
+        }
         //Добавить новый клиент в лист
         public static void Insert()
         {
@@ -70,26 +94,11 @@ namespace MyprojecsApp
             Console.Write("LastName: "); string LastName = Console.ReadLine();
             Console.Write("FirstName: "); string FirstName = Console.ReadLine();
             Console.Write("MiddleName: "); string MiddleName = Console.ReadLine();
-            Console.Write("ID: "); int ID = int.Parse(Console.ReadLine());
+            newID++;
             Console.Write("Balance: "); decimal Balance = Decimal.Parse(Console.ReadLine());
-            Clients ClientInsert = new Clients(LastName, FirstName, MiddleName, ID, Balance);
+            Clients ClientInsert = new Clients(LastName, FirstName, MiddleName, newID, Balance);
             ClientsList.Add(ClientInsert);
-        }
-        //Обновить все
-        public static void Update()
-        {
-            Console.Clear();
-            Console.Write("LastName: "); string LastName = Console.ReadLine();
-            Console.Write("FirstName: "); string FirstName = Console.ReadLine();
-            Console.Write("MiddleName: "); string MiddleName = Console.ReadLine();
-            Console.Write("Balance: "); decimal Balance = Decimal.Parse(Console.ReadLine());
-            foreach (var i in ClientsList)
-            {
-                i.LastName = LastName;
-                i.FirstName = FirstName;
-                i.MiddleName = MiddleName;
-                i.Balance = Balance;
-            }
+            CheckClientList.Add(ClientInsert);
         }
         //Обновить по Id
         public static void UpdateById()
@@ -100,14 +109,14 @@ namespace MyprojecsApp
             Console.Write("FirstName: "); string FirstName = Console.ReadLine();
             Console.Write("MiddleName: "); string MiddleName = Console.ReadLine();
             Console.Write("Balance: "); decimal Balance = Decimal.Parse(Console.ReadLine());
+            Clients ClientUpdate = new Clients(LastName, FirstName, MiddleName, SetId, Balance);
             foreach (var i in ClientsList)
             {
                 if (SetId == i.ID)
                 {
-                    i.LastName = LastName;
-                    i.FirstName = FirstName;
-                    i.MiddleName = MiddleName;
-                    i.Balance = Balance;
+                    int index = ClientsList.IndexOf(i);
+                    ClientsList[index] = ClientUpdate;
+                    break;
                 }
             }
 
@@ -121,11 +130,19 @@ namespace MyprojecsApp
             {
                 if (SetId == i.ID)
                 {
+                    CheckClientList.Remove(i);
                     ClientsList.Remove(i);
                     Console.WriteLine("Элемент удален из списка");
                     break;
                 }
             }
+        }
+        public static void Delete()
+        {
+            Console.Clear();
+                    CheckClientList.Clear();
+                    ClientsList.Clear();
+                    Console.WriteLine("Все элементы удалено!!!");
         }
         //Посмотрет все
         public static void Select()
